@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Structured LLM Development: A Real-World Walkthrough</title>
+        <style>
+                body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+                        line-height: 1.6;
+                        color: #333;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background-color: #f9f9f9;
+                }
+
+                h1,
+                h2,
+                h3 {
+                        color: #2c3e50;
+                }
+
+                h1 {
+                        border-bottom: 2px solid #2c3e50;
+                        padding-bottom: 10px;
+                }
+
+                h2 {
+                        border-bottom: 1px solid #ccc;
+                        padding-bottom: 5px;
+                }
+
+                code {
+                        background-color: #eee;
+                        padding: 2px 4px;
+                        border-radius: 4px;
+                        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+                }
+
+                pre {
+                        background-color: #2d2d2d;
+                        color: #f8f8f2;
+                        padding: 15px;
+                        border-radius: 5px;
+                        overflow-x: auto;
+                }
+
+                pre code {
+                        background: none;
+                        padding: 0;
+                        border-radius: 0;
+                }
+
+                blockquote {
+                        border-left: 4px solid #ccc;
+                        padding-left: 15px;
+                        color: #666;
+                        font-style: italic;
+                }
+
+                ul {
+                        padding-left: 20px;
+                }
+
+                .game-plan-box {
+                        background-color: #eef;
+                        border: 1px solid #cce;
+                        padding: 15px;
+                        border-radius: 5px;
+                        margin: 1em 0;
+                }
+        </style>
+</head>
+
+<body>
+        <h1>Structured LLM Development: A Real-World Walkthrough of LLM-Assisted Dev Work</h1>
+
+        <p>Vibe coding is a term that has gained some recent notoriety within the programming community. While it is
+                impressive what LLMs can achieve with modern agentic AI tools, it is important to note that they don't
+                replace technical skill but rather they amplify it. Think of them as extremely capable assistants: fast,
+                tireless, and increasingly intuitive but in need of clear direction. The key insight here is that the
+                quality of what you get out of an LLM is directly proportional to the quality of what you put in. Vague
+                prompts produce vague results. Detailed context and structured goals produce accurate and efficient
+                outcomes.</p>
+        <p>This post walks through a method I've been developing, one that I call Structured LLM Development. It's a
+                workflow that leverages language models inside a dev environment to tackle complex tasks by guiding the
+                model step-by-step through a living, evolving development plan.</p>
+
+        <h2>Why Structure Matters</h2>
+        <p>Structured LLM Development isn't about automating away your whole job. It's about eliminating the parts that
+                drain your time and mental energy, like boilerplate and config glue code. The approach hinges on a
+                single concept: high-quality inputs lead to high-quality outputs.</p>
+        <p>At the center of this workflow is a modest but powerful artifact:</p>
+        <div class="game-plan-box">
+                <p>📄 <code>game_plan.md</code></p>
+                <p>This markdown file acts as the backbone of the project:</p>
+                <ul>
+                        <li>A checklist and specification rolled into one</li>
+                        <li>Structured in phases with clear, trackable subtasks</li>
+                        <li>Continuously updated via prompts as the project progresses</li>
+                        <li>Shared context across sessions for you and the LLM</li>
+                </ul>
+        </div>
+        <p>It's how I turned the LLM from a tool into a collaborative partner.</p>
+
+        <h2>Case Study: Ingesting SEC Insider Transaction Data</h2>
+        <p>Recently, I needed to ingest insider trading data - Forms 3, 4, and 5 - from the SEC's public datasets.
+                Instead of manually reverse-engineering the data and building ingestion scripts from scratch, I decided
+                to hand the heavy lifting to the LLM.</p>
+        <p>But not blindly. I gave it structure.</p>
+
+        <h3>Traditional Approach:</h3>
+        <ul>
+                <li>Reverse-engineer the dataset schema manually</li>
+                <li>Write SQLAlchemy ORM models by hand</li>
+                <li>Manually build and debug ingestion logic</li>
+                <li>Add logging and error handling as an afterthought</li>
+        </ul>
+
+        <h3>Structured LLM Approach:</h3>
+        <ul>
+                <li>Use Cursor with Gemini 2.5 for LLM integration</li>
+                <li>Create a detailed, phased <code>game_plan.md</code></li>
+                <li>Provide sample data, database schema, and prompts that reflect real dev constraints</li>
+                <li>Prompt the LLM to reflect and update progress iteratively</li>
+        </ul>
+
+        <h2>Step 1: Setup and Context Building</h2>
+        <p>To give the LLM the best possible context, I:</p>
+        <ul>
+                <li>Connected to a Supabase PostgreSQL database</li>
+                <li>Created a <code>.env</code> file with real credentials and an <code>.env.template</code> for safe
+                        sharing</li>
+                <li>Provided multiple sample JSON files from the SEC dataset to help the model infer structure</li>
+        </ul>
+
+        <h2>Step 2: Creating a Detailed <code>game_plan.md</code></h2>
+        <p>Here's an actual example of the prompt I used:</p>
+        <blockquote>
+                "Create a phased, checklist-style game_plan.md that outlines the steps required to analyze and ingest
+                SEC Form 3/4/5 data using SQLAlchemy and Supabase. The plan should include schema inference from JSON,
+                ORM modeling with primary keys, table creation, batch ingestion with upserts (on_conflict_do_update()),
+                and granular logging. Use sub-checklists where necessary."
+        </blockquote>
+        <p>By prompting with real constraints (like the need for upserts and logging), the LLM created a game plan that
+                mirrored my dev priorities. After a few additional prompts, I was left with this final version:</p>
+        <pre><code>## game_plan.md
+
+### Phase 1: Schema Analysis & Planning
+- [ ] Analyze sample JSON records
+  - [ ] Identify all fields and nested structures
+  - [ ] Normalize field names
+  - [ ] Identify relationships and keys
+- [ ] Draft initial schema design and confirm assumptions
+
+### Phase 2: ORM Modeling
+- [ ] Define SQLAlchemy ORM models
+  - [ ] Ensure primary or unique constraints on each table
+  - [ ] Define relationships and foreign keys
+- [ ] Validate model definitions against sample data
+- [ ] Prompt LLM to generate table creation code
+  - [ ] Confirm usage of `Base.metadata.create_all()`
+  - [ ] Verify all tables were successfully created in Supabase
+
+### Phase 3: Ingestion Logic
+- [ ] Establish SQLAlchemy DB connection using `.env` config
+- [ ] Implement ingestion pipeline
+  - [ ] Parse each input file in batches
+  - [ ] Convert rows to ORM model instances
+  - [ ] Perform upserts using `on_conflict_do_update()`
+    - [ ] Ensure required keys are present
+    - [ ] Handle duplicates gracefully
+
+### Phase 4: Logging & Monitoring
+- [ ] Add structured logging throughout pipeline
+  - [ ] Info logs for successful batch inserts
+  - [ ] Warning logs for skipped/malformed entries
+  - [ ] Error logs for database exceptions
+- [ ] Design batching strategy
+  - [ ] Tune batch size for performance
+  - [ ] Commit changes at the end of each batch
+
+### Phase 5: Testing & Validation
+- [ ] Spot check rows for accuracy
+- [ ] Ensure no duplicate entries exist
+- [ ] Validate row counts match expectations
+</code></pre>
+
+        <h2>Step 3: ORM Modeling with Primary Keys & Upserts</h2>
+        <p>Once the schema was inferred, I moved on to creating the SQLAlchemy ORM models. I gave the LLM a clear
+                instruction: each model must include a primary key or a unique constraint, as this would be critical for
+                handling upserts using PostgreSQL's <code>on_conflict_do_update()</code> method. The importance of
+                primary keys in this workflow can't be overstated. Without them, the ORM's ability to identify
+                duplicates and perform safe insert-or-update logic falls apart.</p>
+        <p>The models returned by the LLM were well-structured and incorporated all necessary constraints. I verified
+                that the models included appropriate primary keys and were mapped properly to the Supabase schema. To
+                create tables from the ORM definitions, the LLM also included boilerplate for
+                <code>Base.metadata.create_all()</code>, ensuring that all tables would be created within the target
+                database before any data ingestion began. This setup allowed for seamless and consistent table
+                initialization.
+        </p>
+        <p>Using the PostgreSQL dialect, the LLM generated an upsert pattern like this:</p>
+        <pre><code>from sqlalchemy.dialects.postgresql import insert
+
+stmt = insert(MyModel).values(data)
+stmt = stmt.on_conflict_do_update(
+    index_elements=['id'],
+    set_=data
+)
+session.execute(stmt)</code></pre>
+        <p>This approach provided a clean and reliable mechanism for avoiding duplicate entries and ensuring data
+                consistency, especially when dealing with bulk inserts.</p>
+
+        <h2>Step 4: Logging, Batching, and Debugging</h2>
+        <p>Next came observability and performance. Based on my prompt, the LLM generated structured logging at multiple
+                levels - including info-level logs for successful batch inserts, warnings for malformed or skipped
+                entries, and error logs for exceptions thrown during execution. This made it easy to track exactly where
+                things went wrong or stalled during ingestion.</p>
+        <p>In addition to logging, I asked for a batch processing strategy. The LLM helped implement a loop that would
+                process records in chunks, commit each batch to the database, and gracefully handle failures. Batching
+                proved to be a major win: it minimized memory usage, reduced the risk of full-pipeline crashes, and gave
+                me meaningful progress checkpoints throughout long ingestion jobs. If something failed mid-way, I could
+                resume cleanly from the last successful commit.</p>
+        <p>This phase also highlighted the importance of building resilience into every part of the workflow. With
+                primary keys in place, upserts ensured safe inserts. With logging, I could trace what was working. And
+                with batching, I could scale the process to large datasets without overwhelming system resources.</p>
+
+        <h2>Final Outcome</h2>
+        <p>By combining structured prompts, live feedback, and a continuously evolving <code>game_plan.md</code>, I was
+                able to go from zero to a fully functional ingestion script within an hour. The end result included
+                well-defined SQLAlchemy ORM models complete with proper constraints, an efficient and safe ingestion
+                pipeline leveraging PostgreSQL's <code>on_conflict_do_update()</code> for upserts, batch processing with
+                commit checkpoints to manage resource use and fault tolerance, and robust logging that made diagnosing
+                and debugging straightforward at every step. This approach streamlined what would have been a complex,
+                manual process into a reliable, scalable workflow powered by the LLM as a true collaborator.</p>
+
+        <h2>Takeaways</h2>
+        <ul>
+                <li>High-quality prompts lead to high-quality code.</li>
+                <li>Structure beats guesswork. Breaking tasks into phases helps the LLM think clearly.</li>
+                <li>Make your LLM work like a junior dev — not a magician. Give it context, constraints, and clarity.
+                </li>
+        </ul>
+        <p>If you're building LLM workflows for code generation, try this:</p>
+        <ul>
+                <li>Start with a real <code>game_plan.md</code> prompt</li>
+                <li>Provide the context the model needs (sample data, credentials, business logic)</li>
+                <li>Treat the LLM as a collaborator — not just a code oracle</li>
+        </ul>
+</body>
+
+</html>
